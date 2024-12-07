@@ -1,0 +1,10 @@
+{
+  "name": "cli-url-parser",
+  "version": "1.0.0",
+  "description": "CLI URL parser for Ingemark",
+  "scripts": {
+    "dev": "node --watch ./src/main.js"
+  },
+  "author": "Franjo Mindek",
+  "license": "MIT"
+}
