@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "CLI URL parser for Ingemark",
   "scripts": {
-    "dev": "node --watch ./src/main.js"
+    "cli": "node ./src/main.js",
+    "file": "node ./src/main.js ./src/test.txt",
+    "large": "node ./src/main.js ./src/test-large.txt"
   },
+  "type": "module",
   "author": "Franjo Mindek",
   "license": "MIT"
 }
