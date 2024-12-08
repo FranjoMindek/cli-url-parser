@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "CLI URL parser for Ingemark",
   "scripts": {
-    "cli": "node ./src/main.js",
-    "file": "node ./src/main.js ./src/test.txt",
-    "large": "node ./src/main.js ./src/test-large.txt"
+    "start": "node ./src/main.js"
   },
   "type": "module",
   "author": "Franjo Mindek",

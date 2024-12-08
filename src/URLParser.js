@@ -10,16 +10,22 @@ const URL_REGEXP =
  */
 
 export default class URLParser {
+  #callback;
+  #bracketLevel;
+  #url;
+  #escaping;
+  #betweenBracketBuffer;
+
   /**
    * Creates an instance of the URLParser class.
    * @param {URLCallback} callback - A callback function that will be called when a URL is found.
    */
   constructor(callback) {
-    this.callback = callback;
-    this.bracketLevel = 0;
-    this.url = null;
-    this.escaping = false;
-    this.betweenBracketBuffer = "";
+    this.#callback = callback;
+    this.#bracketLevel = 0;
+    this.#url = null;
+    this.#escaping = false;
+    this.#betweenBracketBuffer = "";
   }
 
   /**
@@ -33,44 +39,44 @@ export default class URLParser {
       typeof chunk === "string",
       `processChunk expected string but got ${typeof chunk} instead`
     );
-    console.debug("Processing chunk");
+    // console.debug("Processing chunk");
 
     for (let i = 0; i < chunk.length; i++) {
       const char = chunk[i];
 
-      // Escaping logic
-      if (this.escaping) {
+      // escaping logic
+      if (this.#escaping) {
         if (char === "[" || char === "]") {
-          this.betweenBracketBuffer += char;
+          this.#betweenBracketBuffer += char;
         } else {
-          this.betweenBracketBuffer += `\\${char}`;
+          this.#betweenBracketBuffer += `\\${char}`;
         }
-        this.escaping = false;
+        this.#escaping = false;
         continue;
       }
       if (char === "\\") {
-        this.escaping = true;
+        this.#escaping = true;
         continue;
       }
 
-      // Bracket logic
+      // bracket logic
       if (char === "[") {
-        this.emptyBuffer();
-        this.bracketLevel++;
-      } else if (char === "]" && this.bracketLevel > 0) {
-        this.emptyBuffer();
+        this.#emptyBuffer();
+        this.#bracketLevel++;
+      } else if (char === "]" && this.#bracketLevel > 0) {
+        this.#emptyBuffer();
 
-        this.bracketLevel--;
-        if (this.bracketLevel === 0) {
-          if (this.url) {
-            this.callback(this.url);
+        this.#bracketLevel--;
+        if (this.#bracketLevel === 0) {
+          if (this.#url) {
+            this.#callback(this.#url);
           }
-          this.url = null;
+          this.#url = null;
         }
       }
       // Collect characters inside the brackets
-      else if (this.bracketLevel > 0) {
-        this.betweenBracketBuffer += char;
+      else if (this.#bracketLevel > 0) {
+        this.#betweenBracketBuffer += char;
       }
     }
   }
@@ -79,25 +85,25 @@ export default class URLParser {
    * Matches the buffer against URL pattern and calls the callback with the last URL found.
    * Resets the buffer after processing.
    */
-  emptyBuffer() {
+  #emptyBuffer() {
     console.assert(
-      this.betweenBracketBuffer != null,
+      this.#betweenBracketBuffer != null,
       "betweenBracketBuffer is null or undefined"
     );
 
-    if (this.betweenBracketBuffer.length === 0) return;
+    if (this.#betweenBracketBuffer.length === 0) return;
 
-    const matches = [...this.betweenBracketBuffer.matchAll(URL_REGEXP)];
+    const matches = [...this.#betweenBracketBuffer.matchAll(URL_REGEXP)];
 
     if (matches.length > 0) {
       const lastUrl = matches.at(-1).at(0);
 
       if (lastUrl) {
-        this.url = lastUrl;
+        this.#url = lastUrl;
       }
     }
 
-    // Reset the buffer after processing
-    this.betweenBracketBuffer = "";
+    // reset the buffer after processing
+    this.#betweenBracketBuffer = "";
   }
 }

@@ -17,29 +17,34 @@ const TITLE_RAG_END = "</title>";
  */
 
 export default class URLCrawler {
+  #visitedUrls;
+  #callback;
+  #requestQueue;
+  #isProcessing;
+
   /**
    * Creates an instance of the URLCrawler class.
    * @param {URLCallback} callback - A callback function that will be called when a URL is processed.
    */
   constructor(callback) {
-    this.visitedUrls = new Set();
-    this.callback = callback;
-    this.requestQueue = [];
-    this.isProcessing = false;
+    this.#visitedUrls = new Set();
+    this.#callback = callback;
+    this.#requestQueue = [];
+    this.#isProcessing = false;
   }
 
   /**
    * Adds a URL to the processing queue if it hasn’t already been visited.
    * @param {string} url - The URL to be processed.
    */
-  enqueue(url) {
-    if (!this.visitedUrls.has(url)) {
-      this.visitedUrls.add(url);
-      this.requestQueue.push({ url, retries: 0 });
+  async enqueue(url) {
+    if (!this.#visitedUrls.has(url)) {
+      this.#visitedUrls.add(url);
+      this.#requestQueue.push({ url, retries: 0 });
 
       // immediately process if no queue
-      if (!this.isProcessing) {
-        this.processQueue();
+      if (!this.#isProcessing) {
+        await this.#processQueue();
       }
     }
   }
@@ -48,27 +53,29 @@ export default class URLCrawler {
    * Processes the queued URLs with a maximum of one request per second.
    * Retries failed requests once after a 1-minute delay.
    */
-  async processQueue() {
-    if (this.isProcessing) return;
+  async #processQueue() {
+    if (this.#isProcessing) return;
 
-    this.isProcessing = true;
+    this.#isProcessing = true;
 
-    while (this.requestQueue.length > 0) {
-      const { url, retries } = this.requestQueue.shift();
+    while (this.#requestQueue.length > 0) {
+      const { url, retries } = this.#requestQueue.shift();
 
       try {
-        await this.processURL(url);
+        await this.#processURL(url);
       } catch (error) {
         if (retries < 1) {
-          console.error(`Failed to process ${url}: ${error.message}`);
-          console.info(`Retrying ${url} in 1 minute...`);
+          console.error(
+            `Failed to process URL "${url}" with message: ${error.message}`
+          );
+          // console.info(`Retrying ${url} in 1 minute...`);
           setTimeout(() => {
-            this.requestQueue.push({ url, retries: retries + 1 });
-            if (!this.isProcessing) this.processQueue();
+            this.#requestQueue.push({ url, retries: retries + 1 });
+            if (!this.#isProcessing) this.#processQueue();
           }, 60000); // retry after 1 minute
         } else {
           console.error(
-            `Failed to process ${url} after retries: ${error.message}`
+            `Failed to process URL "${url}" after "${retries}" retries with message: ${error.message}`
           );
         }
       }
@@ -76,7 +83,7 @@ export default class URLCrawler {
       await new Promise((resolve) => setTimeout(resolve, 1000)); // 1-second delay
     }
 
-    this.isProcessing = false;
+    this.#isProcessing = false;
   }
 
   /**
@@ -84,14 +91,14 @@ export default class URLCrawler {
    * and invokes the callback with the processed information.
    * @param {string} urlString - The URL to be processed.
    */
-  async processURL(urlString) {
+  async #processURL(urlString) {
     let url;
     try {
       url = new URL(
         urlString.startsWith("http") ? urlString : `https://${urlString}`
       );
     } catch {
-      console.error("Failed to parse the URL: ", urlString);
+      console.error(`Failed to parse the URL "${urlString}"`);
       return;
     }
 
@@ -100,8 +107,7 @@ export default class URLCrawler {
 
       if (!response.ok) {
         console.error(
-          `Failed to fetch the URL ${urlString} with status: `,
-          response.status
+          `Failed to fetch the URL "${urlString}" with status: ${response.status}`
         );
         return;
       }
@@ -130,13 +136,10 @@ export default class URLCrawler {
       if (title) callbackObject.title = title;
       if (email) callbackObject.email = email;
 
-      this.callback(callbackObject);
+      this.#callback(callbackObject);
     } catch (error) {
       console.error(
-        "Failed to fetch the URL: ",
-        urlString,
-        " with message: ",
-        error.message
+        `Failed to fetch the URL "${urlString}" with message: ${error.message}`
       );
     }
   }

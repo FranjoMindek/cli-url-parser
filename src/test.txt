@@ -1,3 +1,0 @@
-Start of text [Some text with nested [www.nested.com [https://miba-service.hr/]] and escaped brackets \\[should be ignored\\]] and multiple [www.example.com other text https://www.ingemark.com/] cases.
-Another line with escaped closing bracket \\] and a [google.com].
-Test [www.deepnested.com]
