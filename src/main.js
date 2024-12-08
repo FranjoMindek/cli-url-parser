@@ -9,7 +9,7 @@ if (userArgs.length === 0) {
   processStream(process.stdin);
 } else if (userArgs.length === 1) {
   const filePath = userArgs[0];
-  console.info("Reading from " + filePath + ".");
+  console.info(`Reading from ${filePath}.`);
   const fileStream = fs.createReadStream(filePath, { encoding: "utf8" });
   processStream(fileStream);
 } else {
