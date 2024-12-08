@@ -32,17 +32,18 @@ export default class URLParser {
    * Processes a chunk of text from a stream.
    * If it detects any URLs, it calls the callback with the URL.
    *
-   * @param {string} chunk - The chunk of text to process.
+   * @param {string | Buffer} chunk - The chunk of text to process.
    */
   processChunk(chunk) {
+    const chunkString = chunk.toString();
     console.assert(
-      typeof chunk === "string",
-      `processChunk expected string but got ${typeof chunk} instead`
+      typeof chunkString === "string",
+      `processChunk expected string but got ${typeof chunkString} instead`
     );
     // console.debug("Processing chunk");
 
-    for (let i = 0; i < chunk.length; i++) {
-      const char = chunk[i];
+    for (let i = 0; i < chunkString.length; i++) {
+      const char = chunkString[i];
 
       // escaping logic
       if (this.#escaping) {

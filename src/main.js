@@ -23,18 +23,28 @@ if (userArgs.length === 0) {
  * @param {NodeJS.ReadStream} stream
  */
 function processStream(stream) {
+  const visitedUrls = new Map();
+
   const crawler = new URLCrawler((data) =>
     console.log(JSON.stringify(data, null, 2))
   );
-  const parser = new URLParser(async (data) => await crawler.enqueue(data));
 
-  stream.on("data", (chunk) => {
-    parser.processChunk(chunk.toString());
+  const parser = new URLParser(async (url) => {
+    if (visitedUrls.has(url)) {
+      return;
+    }
+
+    visitedUrls.set(url);
+    await crawler.enqueue(url);
   });
 
-  stream.on("end", () => {
-    // console.info("Stream ended.");
+  stream.on("data", (data) => {
+    parser.processChunk(data);
   });
+
+  // stream.on("end", () => {
+  //   console.info("Stream ended.");
+  // });
 
   stream.on("error", (err) => {
     console.error(`Error reading stream with message: ${err.message}`);

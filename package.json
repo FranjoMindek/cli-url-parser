@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "CLI URL parser for Ingemark",
   "scripts": {
-    "start": "node ./src/main.js"
+    "start": "node ./src/main.js",
+    "test": "vitest --silent=false"
   },
   "type": "module",
   "author": "Franjo Mindek",
@@ -11,6 +12,7 @@
   "devDependencies": {
     "@eslint/js": "^9.16.0",
     "eslint": "^9.16.0",
-    "globals": "^15.13.0"
+    "globals": "^15.13.0",
+    "vitest": "^2.1.8"
   }
 }

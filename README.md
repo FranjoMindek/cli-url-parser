@@ -9,8 +9,9 @@ This project requires Node.js to run. It was developed using node v22, so that v
 
 ## Installation
 
-No installation is required for the project as it is written in javascript.
-Optionally, to install dev dependecies (eslint) you can run the following command:
+No installation is required to run the project as it is written in javascript.
+However, to run the tests it is necessary to install dependecies.
+This can be done by running the following command:
 
 ```bash
 npm install
@@ -44,13 +45,14 @@ npm run start -- ./public/test.txt
 
 Where `./public/test.txt` is the path to the file containing URLs.
 
-## Possible improvements
+## Tests
 
-The project could still be improved with further improvements:
+To run the tests its required to install the dependencies.
+Once that is done, they can be run with the following command:
 
-- Currently, the program doesn't wait for the fetch retry promises to resolve, stopping the whole process once the stream ends
-- The queue implemnetation around requests could be improved to make it easier to wait on queue
-- Currently a part of stream is proccessed twice when reading for URLS (once to move to buffer, and once to find URLs), this could be improved, but with too much effort for it to be worth to me
+```bash
+npm test
+```
 
 ## License
 
