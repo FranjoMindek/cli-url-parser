@@ -1,4 +1,5 @@
 import fs from "fs";
+import URLCrawler from "./URLCrawler.js";
 import URLParser from "./URLParser.js";
 
 const userArgs = process.argv.slice(2);
@@ -23,7 +24,8 @@ if (userArgs.length === 0) {
  * @param {NodeJS.ReadStream} stream
  */
 function processStream(stream) {
-  const parser = new URLParser(console.log);
+  const crawler = new URLCrawler((data) => console.log(JSON.stringify(data)));
+  const parser = new URLParser((data) => crawler.enqueue(data));
 
   stream.on("data", (chunk) => {
     parser.processChunk(chunk.toString());
@@ -31,7 +33,6 @@ function processStream(stream) {
 
   stream.on("end", () => {
     console.info("Stream ended.");
-    process.exit(1);
   });
 
   stream.on("error", (err) => {

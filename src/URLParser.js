@@ -1,7 +1,7 @@
-// Taken from https://stackoverflow.com/a/3809435, modified to match a single value
+// Taken from https://regexr.com/39nr7 and modified
 // But it's fine for a "project like this"
 const URL_REGEXP =
-  /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}[-a-zA-Z0-9()@:%_\+.~#?&//=]*/g;
+  /(?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_+.~#?&//=]*)?/gi;
 
 /**
  * @callback URLCallback
@@ -17,8 +17,7 @@ export default class URLParser {
   constructor(callback) {
     this.callback = callback;
     this.bracketLevel = 0;
-    this.lastConfirmedUrl = null;
-    this.urls = new Map();
+    this.url = null;
     this.escaping = false;
     this.betweenBracketBuffer = "";
   }
@@ -32,7 +31,7 @@ export default class URLParser {
   processChunk(chunk) {
     console.assert(
       typeof chunk === "string",
-      "processChunk expected string but got " + typeof chunk + " instead"
+      `processChunk expected string but got ${typeof chunk} instead`
     );
     console.debug("Processing chunk");
 
@@ -44,7 +43,7 @@ export default class URLParser {
         if (char === "[" || char === "]") {
           this.betweenBracketBuffer += char;
         } else {
-          this.betweenBracketBuffer += "\\" + char;
+          this.betweenBracketBuffer += `\\${char}`;
         }
         this.escaping = false;
         continue;
@@ -61,17 +60,12 @@ export default class URLParser {
       } else if (char === "]" && this.bracketLevel > 0) {
         this.emptyBuffer();
 
-        if (this.urls.has(this.bracketLevel)) {
-          this.lastConfirmedUrl = this.urls.get(this.bracketLevel);
-          this.urls.delete(this.bracketLevel);
-        }
-
         this.bracketLevel--;
         if (this.bracketLevel === 0) {
-          if (this.lastConfirmedUrl) {
-            this.callback(this.lastConfirmedUrl);
+          if (this.url) {
+            this.callback(this.url);
           }
-          this.lastConfirmedUrl = null;
+          this.url = null;
         }
       }
       // Collect characters inside the brackets
@@ -99,7 +93,7 @@ export default class URLParser {
       const lastUrl = matches.at(-1).at(0);
 
       if (lastUrl) {
-        this.urls.set(this.bracketLevel, lastUrl);
+        this.url = lastUrl;
       }
     }
 
